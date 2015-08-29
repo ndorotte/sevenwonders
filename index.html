@@ -36,7 +36,7 @@
                         localStorage.sevenwonders_id = args.id;
                         $('input[name=name]').attr('value', args.name);
                         my_name = args.name;
-                        changeName({name:{value: my_name}});
+                        changeName(my_name);
                         $('input[name=name]').attr('value', my_name);
 
                         // doing this so we don't have that awkward flashing screen on refresh
@@ -119,6 +119,9 @@
             });
 
             window.newGame = function(form){
+                if (my_name != nameInput.value){
+                    changeName(nameInput.value);
+                }
                 if(form.game_name.value == ''){
                     alert('Please enter a name for your game.');
                     return false;
@@ -148,6 +151,9 @@
             }
 
             window.joinGame = function(id){
+                if (my_name != nameInput.value){
+                    changeName(nameInput.value);
+                }
                 var opts = { id: id };
                 send(opts, "joingame");
                 waitScreen();
@@ -155,8 +161,8 @@
                 return false;
             };
 
-            window.changeName = function(form){
-                var opts = { name: form.name.value };
+            window.changeName = function(theName){
+                var opts = { name: theName };
                 send(opts, "changename");
                 my_name = opts.name;
                 return false;
@@ -168,8 +174,8 @@
         <div id="pregame">
             <div id="lobby">
                 <h1>Seven Wonders<br /><span>Created by Antoine Bauza, published by Repos Productions</span></h1>
-                <form id="nickname" method="post" onsubmit="return changeName(this)">
-                        Name: <input type="text" name="name" value="" />
+                <form id="nickname" method="post" onsubmit="return changeName(nameInput.value)">
+                        Name: <input type="text" id="nameInput" name="name" value="" />
                         <input type="submit" value="Change Name" />
                 </form>
                 <div class="column left">
