@@ -34,8 +34,7 @@
                 switch(args.messageType){
                     case 'myname':
                         localStorage.sevenwonders_id = args.id;
-                        $('input[name=name]').attr('value', args.name);
-                        my_name = args.name;
+                        my_name = localStorage.my_name ? localStorage.my_name : args.name;
                         changeName(my_name);
                         $('input[name=name]').attr('value', my_name);
 
@@ -165,6 +164,7 @@
                 var opts = { name: theName };
                 send(opts, "changename");
                 my_name = opts.name;
+                localStorage.my_name = my_name;
                 return false;
             };
         })();
