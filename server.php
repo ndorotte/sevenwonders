@@ -73,7 +73,7 @@ class WonderServer implements IWebSocketServerObserver{
                 }
             }
 
-            $this->say("{$user->id()} connected");
+            $this->say("{$user->id()} {$user->name()} connected");
             return;
         }
 
@@ -93,7 +93,6 @@ class WonderServer implements IWebSocketServerObserver{
                     return $user->send('error', 'Game needs a valid name');
 
                 $game = new SevenWonders();
-                $game->maxplayers = intval($arr['players']);
                 $game->name = $arr['name'];
                 $game->id = gentoken();
                 $game->server = $this;
@@ -101,11 +100,10 @@ class WonderServer implements IWebSocketServerObserver{
 
                 $this->games[$game->id] = $game;
 
-                if ($game->maxplayers > 1)
-                    $this->broadcast('newgame',
-                                     array('name' => $game->name,
-                                           'creator' => $game->creator->name(),
-                                           'id' => $game->id), $user);
+                $this->broadcast('newgame',
+                                 array('name' => $game->name,
+                                       'creator' => $game->creator->name(),
+                                       'id' => $game->id), $user);
                 break;
 
             case 'joingame':
@@ -123,6 +121,13 @@ class WonderServer implements IWebSocketServerObserver{
                 }
                 // Broadcast name change here in case they're hosting a game?
                 break;
+            case 'startgame':
+                if ($user->game() != null
+                        && count($user->game()->players) >= 3
+                        && $user == $user->game()->creator) {
+                    $user->game()->startGame();
+                }
+                break;
 
             default:
                 if($user->game() != null)
@@ -139,7 +144,7 @@ class WonderServer implements IWebSocketServerObserver{
 
         $user = $this->conns[$conn->getId()];
         unset($this->conns[$conn->getId()]);
-        $this->say("{$user->id()} disconnected");
+        $this->say("{$user->id()} {$user->name()} disconnected");
     }
 
     public function onAdminMessage(IWebSocketConnection $conn,

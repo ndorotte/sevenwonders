@@ -274,7 +274,7 @@ class Player {
             if ($player != $this)
                 $players[] = $player->name();
         }
-        $this->send('joingame', array('players' => $players));
+        $this->send('joingame', array('canStartGame' => ($this->game()->creator == $this), 'players' => $players));
     }
 
     public function findCost(Card $card, $type) {

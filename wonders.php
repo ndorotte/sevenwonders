@@ -6,7 +6,6 @@ class SevenWonders {
     public $debug = true;
     public $name;
     public $players = array();
-    public $maxplayers;
     public $creator;
     public $id;
     public $deck;
@@ -56,9 +55,11 @@ class SevenWonders {
     public function addPlayer(Player $user){
         foreach($this->players as $player){
             $player->send('newplayer', array('id' => $user->id(),
-                                             'name' => $user->name()));
+                                             'name' => $user->name(),
+                                             'numplayers' => count($this->players)));
             $user->send('newplayer', array('id' => $player->id(),
-                                           'name' => $player->name()));
+                                           'name' => $player->name(),
+                                           'numplayers' => count($this->players)));
         }
 
         if(count($this->players) == 0)
@@ -66,7 +67,7 @@ class SevenWonders {
         $this->players[] = $user;
         $user->setGame($this);
 
-        if (count($this->players) == $this->maxplayers)
+        if (count($this->players) == 7)
             $this->startGame();
     }
 
@@ -364,7 +365,7 @@ class SevenWonders {
                 break;
 
             default:
-                echo "Undefined message\n";
+                echo "Undefined message\n".$args['messageType'];
                 print_r($args);
                 break;
         }

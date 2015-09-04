@@ -31,6 +31,8 @@
             function onmessage(msg) {
                 var args = JSON.parse(msg.data);
 
+                console.log("onmessage: " + args.messageType);
+
                 switch(args.messageType){
                     case 'myname':
                         localStorage.sevenwonders_id = args.id;
@@ -53,6 +55,7 @@
                         break;
 
                     case 'newplayer':
+                        document.getElementById("startGameButton").disabled = (args.numplayers < 2);
                         $('#waiting ul').append('<li>' + args.name + '</li>');
                         break;
 
@@ -78,6 +81,8 @@
 
                     case 'joingame':
                         waitScreen();
+                        document.getElementById("startGameButton").style.visibility = (args.canStartGame ? "visible" : "hidden");
+                        document.getElementById("startGameButton").disabled = (args.players.length < 2);
                         for (var i = 0; i < args.players.length; i++)
                             $('#waiting ul').append(
                                 '<li>' + args.players[i] + '</li>');
@@ -111,10 +116,6 @@
                 } catch(ex) {
                     console.log(ex);
                 }
-
-                $('input[name=players]').change(function(){
-                    $('#numplayers').html($(this).attr('value'));
-                });
             });
 
             window.newGame = function(form){
@@ -125,9 +126,10 @@
                     alert('Please enter a name for your game.');
                     return false;
                 }
-                var opts = { name: form.game_name.value,
-                             players: form.players.value };
+                var opts = { name: form.game_name.value };
                 send(opts, "newgame");
+                document.getElementById("startGameButton").style.visibility = "visible";
+                document.getElementById("startGameButton").disabled = true;
                 waitScreen();
 
                 return false;
@@ -155,6 +157,7 @@
                 }
                 var opts = { id: id };
                 send(opts, "joingame");
+                document.getElementById("startGameButton").style.visibility = "hidden";
                 waitScreen();
 
                 return false;
@@ -167,6 +170,12 @@
                 localStorage.my_name = my_name;
                 return false;
             };
+
+            window.startGame = function(){
+                var opts = {};
+                send(opts, "startgame");
+                return false;
+            }
         })();
         </script>
     </head>
@@ -187,14 +196,6 @@
                                 <td><input type="text" name="game_name" /></td>
                             </tr>
                             <tr>
-                                <td># Players:</td>
-                                <td>
-                                    <input type='range' name='players' min='3'
-                                           max='7' value='3' />
-                                    <span id='numplayers'>3</span>
-                                </td>
-                            </tr>
-                            <tr>
                                 <td></td>
                                 <td><input type="submit" value="Start" /></td>
                             </tr>
@@ -207,8 +208,9 @@
                 </div>
             </div>
             <div id="waiting">
-                <h1>Waiting for Players...</h1>
+                <h1>Waiting for at least 3 players...</h1>
                 <ul></ul>
+                <button id="startGameButton" onclick="return startGame()" style="visibility: visible;">Start Game</button>
             </div>
         </div>
         <div id="game">
